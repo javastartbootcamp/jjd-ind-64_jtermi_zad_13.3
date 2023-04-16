@@ -8,8 +8,6 @@ public class Product {
     private BigDecimal price;
     private String currency;
 
-    private BigDecimal priceInEur;
-
     public Product(String name, BigDecimal price, String currency) {
         this.name = name;
         this.price = price;
@@ -29,14 +27,6 @@ public class Product {
 
     public String getCurrency() {
         return currency;
-    }
-
-    public BigDecimal getPriceInEur() {
-        return priceInEur;
-    }
-
-    public void setPriceInEur(BigDecimal priceInEur) {
-        this.priceInEur = priceInEur;
     }
 
 }

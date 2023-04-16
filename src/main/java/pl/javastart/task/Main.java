@@ -2,7 +2,6 @@ package pl.javastart.task;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
@@ -18,25 +17,21 @@ public class Main {
         currencyRates = ListUtils.readCurrenciesToList(fileOfCurrencies);
         productList = ListUtils.readProductsToList(fileOfProducts);
 
-        ListUtils.calculateEurPrice((ArrayList<Product>) productList, (ArrayList<CurrencyData>) currencyRates);
+        List<ProductWithEurPrices> productsWithEurPricesList = ListUtils.calculateEurPrice(productList, currencyRates);
 
-        BigDecimal sumOfAllProductsInEur = ListUtils.calculatePriceOfAllProductsInEur((ArrayList<Product>) productList,
-                (ArrayList<CurrencyData>) currencyRates);
+        BigDecimal sumOfAllProductsInEur = ListUtils.calculatePriceOfAllProductsInEur(productsWithEurPricesList);
         System.out.println("Suma wszystkich produktów w EUR wynosi: " + sumOfAllProductsInEur);
 
-        BigDecimal averagePriceInEur = ListUtils.printAverageValueOfProducts((ArrayList<Product>) productList,
-                (ArrayList<CurrencyData>) currencyRates);
+        BigDecimal averagePriceInEur = ListUtils.calculateAverageValueOfProducts(productsWithEurPricesList);
         System.out.println("Średnia wartość produktu w EUR wynosi: " + averagePriceInEur);
 
-        Product mostExpensiveProduct = ListUtils.findMostExpensiveProduct((ArrayList<Product>) productList,
-                (ArrayList<CurrencyData>) currencyRates);
+        ProductWithEurPrices mostExpensiveProduct = ListUtils.findMostExpensiveProduct(productsWithEurPricesList);
         System.out.println("Najdroższy produkt w przeliczeniu na EUR to: " + mostExpensiveProduct.getName()
-                + " a jego cena to: " + mostExpensiveProduct.getPriceInEur());
+                + " a jego cena to: " + mostExpensiveProduct.getEurPrice());
 
-        Product lessExpensiveProduct = ListUtils.findLessExpensiveProduct(((ArrayList<Product>) productList),
-                (ArrayList<CurrencyData>) currencyRates);
+        ProductWithEurPrices lessExpensiveProduct = ListUtils.findLessExpensiveProduct(productsWithEurPricesList);
         System.out.println("Najdroższy produkt w przeliczeniu na EUR to: " + lessExpensiveProduct.getName()
-                + " a jego cena to: " + lessExpensiveProduct.getPriceInEur());
+                + " a jego cena to: " + lessExpensiveProduct.getEurPrice());
 
     }
 }

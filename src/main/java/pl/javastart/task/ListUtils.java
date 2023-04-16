@@ -8,16 +8,14 @@ import java.util.List;
 
 public class ListUtils {
 
-    private static Boolean calculatedPricesInEur = false;
-
     public static List<CurrencyData> readCurrenciesToList(File file) {
-        ArrayList<String> listOfLines = FileHandling.readFileToList(file);
+        List<String> listOfLines = FileHandling.readFileToList(file);
         return fillListOfCurrencies(listOfLines);
     }
 
-    private static List<CurrencyData> fillListOfCurrencies(ArrayList<String> listOfLines) {
+    private static List<CurrencyData> fillListOfCurrencies(List<String> listOfLines) {
 
-        ArrayList<CurrencyData> listOfCurrencies = new ArrayList<>();
+        List<CurrencyData> listOfCurrencies = new ArrayList<>();
         for (String listOfLine : listOfLines) {
 
             String[] currencySplit = listOfLine.split(";", 2);
@@ -37,12 +35,10 @@ public class ListUtils {
         return fillListOfProducts(listOfLines);
     }
 
-    private static List<Product> fillListOfProducts(ArrayList<String> listOfLines) {
-        ArrayList<Product> listOfProducts = new ArrayList<>();
+    private static List<Product> fillListOfProducts(List<String> listOfLines) {
+        List<Product> listOfProducts = new ArrayList<>();
         for (String listOfLine : listOfLines) {
-
             String[] productSplit = listOfLine.split(";", 3);
-
             String productName = productSplit[0];
             Double d = Double.valueOf(productSplit[1]);
             BigDecimal productPrice = BigDecimal.valueOf(d);
@@ -54,22 +50,25 @@ public class ListUtils {
         return listOfProducts;
     }
 
-    static void calculateEurPrice(ArrayList<Product> products, ArrayList<CurrencyData> currencies) {
+    static List<ProductWithEurPrices> calculateEurPrice(List<Product> products, List<CurrencyData> currencies) {
+        List<ProductWithEurPrices> productsEurPrices = new ArrayList<>();
+
         for (Product product : products) {
             String currency = product.getCurrency();
             BigDecimal priceInCurrency = product.getPrice();
             BigDecimal exchangeRate = getExchangeRate(currency, currencies);
+
             try {
                 BigDecimal priceInEur = priceInCurrency.divide(exchangeRate, 16, RoundingMode.HALF_UP);
-                product.setPriceInEur(priceInEur);
+                productsEurPrices.add(new ProductWithEurPrices(product, priceInEur));
             } catch (NullPointerException e) {
                 System.out.println("Brak waluty na liście lub kurs równy 0 dla " + currency);
             }
         }
-        calculatedPricesInEur = true;
+        return productsEurPrices;
     }
 
-    static BigDecimal getExchangeRate(String currency, ArrayList<CurrencyData> currencies) {
+    static BigDecimal getExchangeRate(String currency, List<CurrencyData> currencies) {
         for (CurrencyData currencyData : currencies) {
             if (currencyData.getName().equals(currency)) {
                 return currencyData.getExchangeRate();
@@ -78,41 +77,30 @@ public class ListUtils {
         return null;
     }
 
-    static BigDecimal calculatePriceOfAllProductsInEur(ArrayList<Product> products, ArrayList<CurrencyData> currencies) {
-
-        if (calculatedPricesInEur = false) {
-            calculateEurPrice(products, currencies);
-        }
+    static BigDecimal calculatePriceOfAllProductsInEur(List<ProductWithEurPrices> products) {
 
         BigDecimal result = BigDecimal.valueOf(0);
-        for (Product product : products) {
-            result = result.add(product.getPriceInEur());
+        for (ProductWithEurPrices product : products) {
+            result = result.add(product.getEurPrice());
         }
         return result;
     }
 
-    static BigDecimal printAverageValueOfProducts(ArrayList<Product> products, ArrayList<CurrencyData> currencies) {
+    static BigDecimal calculateAverageValueOfProducts(List<ProductWithEurPrices> products) {
 
-        if (calculatedPricesInEur = false) {
-            calculateEurPrice(products, currencies);
-        }
-
-        BigDecimal sum = calculatePriceOfAllProductsInEur(products, currencies);
+        BigDecimal sum = calculatePriceOfAllProductsInEur(products);
         return sum.divide(BigDecimal.valueOf(products.size()), 16, RoundingMode.HALF_UP);
     }
 
-    static Product findMostExpensiveProduct(ArrayList<Product> products, ArrayList<CurrencyData> currencies) {
-
-        if (calculatedPricesInEur = false) {
-            calculateEurPrice(products, currencies);
-        }
+    static ProductWithEurPrices findMostExpensiveProduct(List<ProductWithEurPrices> products) {
 
         BigDecimal result = new BigDecimal(0);
         BigDecimal price;
-        Product finalProduct = new Product();
-        for (Product product : products) {
-            price = product.getPriceInEur();
-            if (result.compareTo(price) == -1) {
+        ProductWithEurPrices finalProduct = new ProductWithEurPrices();
+
+        for (ProductWithEurPrices product : products) {
+            price = product.getEurPrice();
+            if (result.compareTo(price) < 0) {
                 result = price;
                 finalProduct = product;
             }
@@ -120,18 +108,15 @@ public class ListUtils {
         return finalProduct;
     }
 
-    static Product findLessExpensiveProduct(ArrayList<Product> products, ArrayList<CurrencyData> currencies) {
+    static ProductWithEurPrices findLessExpensiveProduct(List<ProductWithEurPrices> products) {
 
-        if (calculatedPricesInEur = false) {
-            calculateEurPrice(products, currencies);
-        }
-
-        BigDecimal result = products.get(0).getPriceInEur();
+        BigDecimal result = products.get(0).getEurPrice();
         BigDecimal price;
-        Product finalProduct = new Product();
-        for (Product product : products) {
-            price = product.getPriceInEur();
-            if (result.compareTo(price) == 1) {
+        ProductWithEurPrices finalProduct = new ProductWithEurPrices();
+
+        for (ProductWithEurPrices product : products) {
+            price = product.getEurPrice();
+            if (result.compareTo(price) > 0) {
                 result = price;
                 finalProduct = product;
             }
